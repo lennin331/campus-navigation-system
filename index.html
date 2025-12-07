@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Campus Navigation</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         #map {
             border-radius:10px; 
             height:97vh;
             width:70%;
-            border: 2px solid #003831;
-             
-           
+            border: 2px solid #003831;      
         }
         #navigation {
             background-color:#E7DEAF;
@@ -37,38 +35,113 @@
         #navigation > div {
             height:90%;
             width:33vw;
-            /* border : 2px solid black; */
             margin:auto;
+            padding:20px;
         }
         #user-map-location,#directions,#results {
-            height:100px;
+            height:120px;
             width:30vw;
-            border:2px solid black;
+            padding-right:0px;
+            padding-top:auto;  
         }
         #search {
             background-color:#d4d1c0 ;
             margin-bottom: 10px;
+            width: 70%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #003831;
         }
-
         
+        /* Autocomplete styles */
+        .autocomplete-container {
+            position: relative;
+            width: 70%;
+        }
+        
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #003831;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #E7DEAF;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+        }
+        
+        .autocomplete-item:hover {
+            background-color: #e9e9e9;
+        }
+        
+        .autocomplete-active {
+            background-color: #003831 !important;
+            color: #ffffff;
+        }
+        
+        #go-to button {
+            padding: 8px 15px;
+            background-color: #003831;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        
+        #go-to button:hover {
+            background-color: #00594d;
+        }
+        #user-map-location{
+            border:2px solid black;
+            background-color: #a8d483;
+            border-radius:10px;
+            padding-left:10px;
+            padding-bottom: 10px;
+           
+        }
+        #user-latitude,#user-longitude  {
+            margin:auto;
+      
+        }
 
     </style>
 </head>
-<body style="background-color: #73AF6F;">
+<body style="background-color: #73AF6F; overflow: hidden;">
     
     <div class="container">
          <div id="map"></div>
         <div id="navigation">
              <div id="user-location">
                 <h2>Where Am I ?</h2>
-                <div id="user-map-location"></div>
+                <div id="user-map-location">
+                    <h3>You are at : </h3>
+                    <h4 id="user-location-result"></h4>
+                    <p id="user-latitude"></p>
+                     <p id="user-longitude"></p>
+                   
+                </div>
+            
              </div>
              <div id="go-to">
                 <h2>Navigate to :</h2>
                 <label for="search"></label>
-                <input id="search" type="text">
-                <button>Go</button>
-                <div id="results"></div>
+                <div class="autocomplete-container">
+                    <input id="search" type="text" placeholder="Search ">
+                    <div id="autocomplete-list" class="autocomplete-items"></div>
+                    <button id="go-button">Go</button>
+                </div>
              </div>
              <div id="access">
                 <h2>Directions :</h2>
@@ -77,14 +150,205 @@
         </div>
     </div>
     <script>
-        var map = L.map('map').setView([13.026553,80.016565],17);
-        L.tileLayer('https://api.maptiler.com/maps/topo-v4/{z}/{x}/{y}@2x.png?key=E7SAn9VCAPS3bh8zDoBf',{ attribution : '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'}).addTo(map);
-        var marker = L.marker([13.026553,80.016565]).addTo(map);
-    </script>
-    <script>
-        
-    </script>
 
-    
+        const campusLocations = new Map([
+            ["Main Gate", { lat: 13.02240, lng: 80.01667}],
+            ["Library Block", { lat: 13.02620, lng: 80.01708 }],
+            ["CSE Department", { lat: 13.02605, lng: 80.01689 }],
+            ["ECE Department", { lat: 13.02616, lng: 80.01598 }],
+            ["AHS Canteen", { lat: 13.02446, lng: 80.01775}],
+            ["EEE Department", { lat: 13.02662, lng: 80.01592 }],
+            ["Admin Block", { lat: 13.02593, lng: 80.01639 }],
+            ["Generator Area", { lat: 13.02706, lng: 80.01652 }],
+            ["SCAD E1", { lat: 13.02817, lng: 80.01638 }],
+            ["SCAD E2", { lat: 13.02789, lng: 80.01605 }],
+            ["SCAD Library", { lat: 13.02802, lng: 80.01540 }],
+            ["Vaigai Hostel", { lat: 13.03028, lng: 80.01681 }],
+            ["Krishna Hostel", { lat: 13.03032, lng: 80.01794 }],
+            ["SEC Canteen", { lat: 13.02930, lng: 80.01923 }],
+            ["SEC Admin Block", { lat: 13.02862, lng: 80.01945 }],
+            ["Side Gate", { lat: 13.02841, lng: 80.02214 }],
+            ["Bus Parking Enterence", { lat: 13.028235, lng: 80.01975 }],
+            ["Bus Parking Exit", { lat: 13.02809, lng: 80.02130 }],
+            ["SEC Pond", { lat: 13.028919, lng: 80.017555 }],
+            ["Noyyal Hostel", { lat: 13.028007, lng: 80.017347 }],
+            ["Amaravathi Guest House", { lat: 13.02768, lng: 80.01762 }],
+            ["Garden Gallery", { lat: 13.026802, lng: 80.017127 }],
+            ["AHS Block", { lat: 13.02543, lng: 80.01750 }]
+
+
+
+        ]);
+
+        var map = L.map('map').setView([13.026553,80.016565],17);
+        L.tileLayer('https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}@2x.png?key=E7SAn9VCAPS3bh8zDoBf',{ 
+            attribution : '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',maxZoom: 22
+        }).addTo(map);
+        
+        var marker = L.marker([13.026553,80.016565]).addTo(map);
+       
+        let userLat = null, userLng = null, userMarker = null;
+        navigator.geolocation.watchPosition((pos)=>{
+            userLat = pos.coords.latitude;
+            userLng = pos.coords.longitude;
+             document.getElementById('user-latitude').innerText = `
+    latitude: ${userLat.toFixed(3)}`;
+             document.getElementById('user-longitude').innerHTML = `
+    longitude: ${userLng.toFixed(3)}`;
+            if (!userMarker) {
+                userMarker = L.marker([userLat, userLng]).addTo(map);
+            } else {
+                userMarker.setLatLng([userLat, userLng]);
+            }
+        }, console.error, { enableHighAccuracy: true });
+
+        // Autocomplete functionality
+        const searchInput = document.getElementById('search');
+        const autocompleteList = document.getElementById('autocomplete-list');
+        const goButton = document.getElementById('go-button');
+        const destSelect = document.getElementById('destSelect');
+        const youAreAt = document.getElementById('user-location-result');
+        
+        const uLng = document.getElementById('user-longitude');
+
+        console.log(userLat);
+        // youAreAt.innerHTML();
+        
+        uLng.innerHTML = userLng;
+        // Array of all campus locations for autocomplete
+        const campusLocationsArray = Array.from(campusLocations.keys());
+        
+        // Function to filter locations based on input
+        function filterLocations(input) {
+            if (!input) return [];
+            return campusLocationsArray.filter(location => 
+                location.toLowerCase().includes(input.toLowerCase())
+            );
+        }
+        
+        // Function to display autocomplete results
+        function showAutocompleteResults(input) {
+            const filteredLocations = filterLocations(input);
+            autocompleteList.innerHTML = '';
+            
+            if (filteredLocations.length === 0 || !input) {
+                autocompleteList.style.display = 'none';
+                return;
+            }
+            
+            filteredLocations.forEach(location => {
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.textContent = location;
+                
+                div.addEventListener('click', function() {
+                    searchInput.value = location;
+                    autocompleteList.innerHTML = '';
+                    autocompleteList.style.display = 'none';
+                    updateDropdownSelection(location);
+                });
+                
+                autocompleteList.appendChild(div);
+            });
+            
+            autocompleteList.style.display = 'block';
+        }
+        
+        // Function to update dropdown selection
+        function updateDropdownSelection(location) {
+            for (let option of destSelect.options) {
+                if (option.textContent.includes(location) || option.value === location) {
+                    option.selected = true;
+                    break;
+                }
+            }
+        }
+        
+        // Event listener for search input
+        searchInput.addEventListener('input', function() {
+            showAutocompleteResults(this.value);
+        });
+        
+        // Event listener for click on Go button
+        goButton.addEventListener('click', function() {
+            const selectedLocation = searchInput.value || destSelect.value;
+            if (selectedLocation && campusLocations.has(selectedLocation)) {
+                const coords = campusLocations.get(selectedLocation);
+                map.setView([coords.lat, coords.lng], 17);
+                
+                // Clear previous markers (except user marker)
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+                
+                // Add new marker for selected location
+                marker = L.marker([coords.lat, coords.lng]).addTo(map);
+                marker.bindPopup(`<b>${selectedLocation}</b>`).openPopup();
+                
+                // Update directions display
+                const directionsDiv = document.getElementById('directions');
+                if (userLat && userLng) {
+                    directionsDiv.innerHTML = `
+                        <p><strong>From:</strong> Your Location</p>
+                        <p><strong>To:</strong> ${selectedLocation}</p>
+                        <p><strong>Distance:</strong> Calculating...</p>
+                    `;
+                } else {
+                    directionsDiv.innerHTML = `<p>Navigating to: ${selectedLocation}</p>`;
+                }
+            }
+        });
+        
+        // Event listener for dropdown selection
+        destSelect.addEventListener('change', function() {
+            searchInput.value = this.value;
+        });
+        
+        // Close autocomplete when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !autocompleteList.contains(e.target)) {
+                autocompleteList.style.display = 'none';
+            }
+        });
+        
+        // Keyboard navigation for autocomplete
+        let currentFocus = -1;
+        searchInput.addEventListener('keydown', function(e) {
+            const items = autocompleteList.getElementsByClassName('autocomplete-item');
+            
+            if (e.key === 'ArrowDown') {
+                currentFocus++;
+                addActive(items);
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp') {
+                currentFocus--;
+                addActive(items);
+                e.preventDefault();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentFocus > -1 && items[currentFocus]) {
+                    items[currentFocus].click();
+                }
+            }
+        });
+        
+        function addActive(items) {
+            if (!items) return false;
+            
+            // Remove active class from all items
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove('autocomplete-active');
+            }
+            
+            if (currentFocus >= items.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = items.length - 1;
+            
+            if (items[currentFocus]) {
+                items[currentFocus].classList.add('autocomplete-active');
+                items[currentFocus].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+    </script>
 </body>
 </html>
