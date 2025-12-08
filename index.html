@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
-       /* Base container and layout */
+/* Base container and layout */
 .container {
     display: flex;
     height: 100vh;
@@ -74,27 +74,30 @@
     font-size: 0.9rem;
 }
 
-/* Autocomplete containers */
 .autocomplete-container {
     position: relative;
     display: flex;
     gap: 5px;
     width: 100%;
+    font-size:smaller;
 }
 
 .autocomplete-container input {
     flex: 1;
-   padding:2px ;
-    padding-left: 1vh;
+    padding: 0px;
+    height: 20px;
+    padding-left:1vh;
     background-color: #d4d1c0;
     border: 1px solid #003831;
     border-radius: 5px;
-    min-height: 44px;
+    font-size: 0.9rem;
+    min-height: 30px;
+}
 
-/* Icon buttons */
+
 .icon-btn {
     padding: 0 15px;
-    min-width: 44px; /* Better touch target */
+    min-width: 44px; 
     min-height: 44px;
     background-color: #003831;
     color: white;
@@ -111,7 +114,7 @@
     background-color: #00594d;
 }
 
-/* Autocomplete dropdowns */
+
 .autocomplete-items {
     position: absolute;
     border: 1px solid #003831;
@@ -126,6 +129,8 @@
     border-radius: 0 0 5px 5px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: none;
+    
+
 }
 
 .autocomplete-item {
@@ -143,12 +148,12 @@
     background-color: #e9e9e9;
 }
 
-/* .autocomplete-active {
+.autocomplete-active {
     background-color: #003831 !important;
     color: #ffffff;
-} */
+}
 
-/* Action buttons */
+
 .action-buttons {
     display: flex;
     gap: 10px;
@@ -297,7 +302,7 @@
     }
     
     #navigation {
-        height: 97vh;
+        height: 93vh;
         width: 30%;
         margin-left: 5px;
         margin-top: 0;
@@ -315,9 +320,6 @@
     
     .autocomplete-container input {
         font-size: 1rem;
-        padding:2px ;
-        padding-left: 1vh;
-        font-size: 0.9rem;
     }
     
     .autocomplete-item {
@@ -377,8 +379,7 @@
     }
     
     .autocomplete-container input {
-        padding:2px ;
-        padding-left: 1vh;
+        padding: 8px 10px;
         font-size: 0.9rem;
     }
     
@@ -386,6 +387,8 @@
         padding: 10px;
     }
 }
+
+/* Prevent text zoom on mobile */
 @media (max-width: 768px) {
     html {
         -webkit-text-size-adjust: 100%;
@@ -412,6 +415,7 @@
     }
 }
 
+/* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
     * {
         animation-duration: 0.01ms !important;
@@ -419,11 +423,6 @@
         transition-duration: 0.01ms !important;
     }
 }
-#go-button {
-    color:#73AF6F ;
-}
-
-
     </style>
 </head>
 <body style="background-color: #73AF6F; overflow: hidden;">
